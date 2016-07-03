@@ -8,12 +8,16 @@ import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMo
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import repos.WidgetRepoImpl
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class Widgets @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Controller
   with MongoController with ReactiveMongoComponents {
 
   def index = Action.async { implicit request =>
     widgetRepo.find() map (widgets => Ok(Json.toJson(widgets)))
   }
+
+  import WidgetFields._
 
   def create = Action.async(BodyParsers.parse.json) { implicit request =>
     val name = (request.body \ Name).as[String]
@@ -33,8 +37,6 @@ class Widgets @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Controll
       .map(widget => Ok(Json.toJson(widget)))
   }
 
-  def widgetRepo = new WidgetRepoImpl(reactiveMongoApi)
-
   def update(id: String) = Action.async(BodyParsers.parse.json) { implicit request =>
     val name = (request.body \ Name).as[String]
     val description = (request.body \ Description).as[String]
@@ -48,6 +50,8 @@ class Widgets @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Controll
     widgetRepo.remove(BSONDocument(id -> BSONObjectID(id)))
       .map(result => Accepted)
   }
+
+  def widgetRepo = new WidgetRepoImpl(reactiveMongoApi)
 
 }
 
