@@ -1,6 +1,4 @@
 import org.scalatestplus.play._
-import play.api.test._
-import play.api.test.Helpers._
 
 /**
  * add your integration spec here.
@@ -8,13 +6,24 @@ import play.api.test.Helpers._
  */
 class IntegrationSpec extends PlaySpec with OneServerPerTest with OneBrowserPerTest with HtmlUnitFactory {
 
+  //  override lazy val port = 9000
+
   "Application" should {
 
     "work from within a browser" in {
 
       go to ("http://localhost:" + port)
 
-      pageSource must include ("Your new application is ready.")
+      pageSource must include("Your database is ready.")
+    }
+
+    "remove data through the browser" in {
+
+      go to ("http://localhost:" + port + "/cleanup")
+
+      pageSource must include("Your database is clean.")
     }
   }
 }
+
+
