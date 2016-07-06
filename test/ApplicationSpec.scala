@@ -1,4 +1,4 @@
-import controllers.Widgets
+import controllers.Ads
 import org.junit.runner.RunWith
 import org.scalatestplus.play._
 import org.specs2.mock.Mockito
@@ -10,7 +10,7 @@ import play.api.test._
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.commands.LastError
 import reactivemongo.bson.BSONDocument
-import repos.WidgetRepoImpl
+import repos.AdRepoImpl
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,7 +31,7 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest with Results with Mock
 
   }
 
-  val mockRecipeRepo = mock[WidgetRepoImpl]
+  val mockRecipeRepo = mock[AdRepoImpl]
   val reactiveMongoApi = mock[ReactiveMongoApi]
   val documentId = "56a0ddb6c70000c700344254"
   val lastRequestStatus = new LastError(true, None, None, None, 0, None, false, None, None, false, None, None)
@@ -51,8 +51,8 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest with Results with Mock
     ))
   val controller = new TestController()
 
-  class TestController() extends Widgets(reactiveMongoApi) {
-    override def widgetRepo: WidgetRepoImpl = mockRecipeRepo
+  class TestController() extends Ads(reactiveMongoApi) {
+    override def adRepo: AdRepoImpl = mockRecipeRepo
   }
 
 

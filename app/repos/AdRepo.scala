@@ -12,7 +12,7 @@ import reactivemongo.bson.{BSONDocument, BSONObjectID}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait WidgetRepo {
+trait AdRepo {
   def find()(implicit ec: ExecutionContext): Future[List[JsObject]]
 
   def select(selector: BSONDocument)(implicit ec: ExecutionContext): Future[Option[JsObject]]
@@ -24,7 +24,7 @@ trait WidgetRepo {
   def save(document: BSONDocument)(implicit ec: ExecutionContext): Future[WriteResult]
 }
 
-class WidgetRepoImpl @Inject()(reactiveMongoApi: ReactiveMongoApi) extends WidgetRepo {
+class AdRepoImpl @Inject()(reactiveMongoApi: ReactiveMongoApi) extends AdRepo {
 
   override def find()(implicit ec: ExecutionContext): Future[List[JsObject]] = {
     val genericQueryBuilder = collection.find(Json.obj())
@@ -35,6 +35,8 @@ class WidgetRepoImpl @Inject()(reactiveMongoApi: ReactiveMongoApi) extends Widge
   override def select(selector: BSONDocument)(implicit ec: ExecutionContext): Future[Option[JsObject]] = {
     collection.find(selector).one[JsObject]
   }
+
+  def collection = reactiveMongoApi.db.collection[JSONCollection]("ads")
 
   override def update(selector: BSONDocument, update: BSONDocument)(implicit ec: ExecutionContext): Future[WriteResult] = {
     collection.update(selector, update)
@@ -47,7 +49,5 @@ class WidgetRepoImpl @Inject()(reactiveMongoApi: ReactiveMongoApi) extends Widge
   override def save(document: BSONDocument)(implicit ec: ExecutionContext): Future[WriteResult] = {
     collection.update(BSONDocument("_id" -> document.get("_id").getOrElse(BSONObjectID.generate)), document, upsert = true)
   }
-
-  def collection = reactiveMongoApi.db.collection[JSONCollection]("widgets")
 
 }

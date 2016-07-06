@@ -14,9 +14,10 @@ GET     /message                    controllers.AsyncController.message
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
 
-#Widgets
-GET        /api/widgets         controllers.Widgets.index
-GET        /api/widget/:id      controllers.Widgets.read(id: String)
-POST       /api/widget          controllers.Widgets.create
-DELETE     /api/widget/:id      controllers.Widgets.delete(id: String)
-PATCH      /api/widget/:id      controllers.Widgets.update(id: String)
+#Ads
+GET        /api/ad         controllers.Ads.index
+GET        /api/ad/:id      controllers.Ads.read(id: String)
+PUT        /api/ad/:id      controllers.Ads.update(id: String)
+POST       /api/ad          controllers.Ads.create
+DELETE     /api/ad/:id      controllers.Ads.delete(id: String)
+PATCH      /api/ad/:id      controllers.Ads.update(id: String)
