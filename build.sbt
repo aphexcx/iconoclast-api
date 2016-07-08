@@ -17,5 +17,6 @@ libraryDependencies ++= Seq(
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
+def IN_DOCKER: Boolean = (!System.getProperty("os.name").contains("Mac OS X"))
 
-fork in run := true
+fork in run := !IN_DOCKER
