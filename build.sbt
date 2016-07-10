@@ -19,4 +19,8 @@ resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
 def IN_DOCKER: Boolean = (!System.getProperty("os.name").contains("Mac OS X"))
 
-fork in run := !IN_DOCKER
+//fork in run := !IN_DOCKER
+fork in run := false
+
+
+libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.1.9"

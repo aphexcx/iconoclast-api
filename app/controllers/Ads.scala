@@ -13,18 +13,24 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class Ads @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Controller
   with MongoController with ReactiveMongoComponents {
 
+  val adRepo = AdRepoImpl(reactiveMongoApi)
+
+  import AdFields._
+
   def index = Action.async { implicit request =>
     adRepo.find() map (ads => Ok(Json.toJson(ads)))
   }
 
-  import AdFields._
+  import controllers.AdFields._
 
   def create = Action.async(BodyParsers.parse.json) { implicit request =>
+    val url = (request.body \ Url).as[String]
     val age = (request.body \ Age).as[Int]
     val title = (request.body \ Title).as[String]
     val text = (request.body \ Text).as[String]
     val imageUrls = (request.body \ ImageUrls).as[List[String]]
     adRepo.save(BSONDocument(
+      Url -> url,
       ImageUrls -> imageUrls,
       Age -> age,
       Title -> title,
@@ -32,24 +38,24 @@ class Ads @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Controller
     )).map(result => Created)
   }
 
-  import controllers.AdFields._
-
   def read(id: String) = Action.async { implicit request =>
     adRepo.select(BSONDocument(id -> BSONObjectID(id)))
       .map(widget => Ok(Json.toJson(widget)))
   }
 
   def update(id: String) = Action.async(BodyParsers.parse.json) { implicit request =>
+    val url = (request.body \ Url).as[String]
     val age = (request.body \ Age).as[Int]
     val title = (request.body \ Title).as[String]
     val text = (request.body \ Text).as[String]
     val imageUrls = (request.body \ ImageUrls).as[List[String]]
     adRepo.update(BSONDocument(Id -> BSONObjectID(id)),
       BSONDocument("$set" -> BSONDocument(
-        ImageUrls -> imageUrls,
+        Url -> url,
         Age -> age,
         Title -> title,
-        Text -> text
+        Text -> text,
+        ImageUrls -> imageUrls
       )))
       .map(result => Accepted)
   }
@@ -59,12 +65,11 @@ class Ads @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Controller
       .map(result => Accepted)
   }
 
-  def adRepo = new AdRepoImpl(reactiveMongoApi)
-
 }
 
 object AdFields {
   val Id = "_id"
+  val Url = "url"
   val Age = "age"
   val Title = "title"
   val Text = "text"

@@ -2,15 +2,18 @@ package repos
 
 import javax.inject.Inject
 
+import controllers.AdFields
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import play.modules.reactivemongo.json._
-import play.modules.reactivemongo.json.collection.JSONCollection
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
+import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.{ExecutionContext, Future}
+import scalaz.syntax.id._
 
 trait AdRepo {
   def find()(implicit ec: ExecutionContext): Future[List[JsObject]]
@@ -32,11 +35,11 @@ class AdRepoImpl @Inject()(reactiveMongoApi: ReactiveMongoApi) extends AdRepo {
     cursor.collect[List]()
   }
 
+  def collection: JSONCollection = reactiveMongoApi.db.collection[JSONCollection]("ads")
+
   override def select(selector: BSONDocument)(implicit ec: ExecutionContext): Future[Option[JsObject]] = {
     collection.find(selector).one[JsObject]
   }
-
-  def collection = reactiveMongoApi.db.collection[JSONCollection]("ads")
 
   override def update(selector: BSONDocument, update: BSONDocument)(implicit ec: ExecutionContext): Future[WriteResult] = {
     collection.update(selector, update)
@@ -50,4 +53,16 @@ class AdRepoImpl @Inject()(reactiveMongoApi: ReactiveMongoApi) extends AdRepo {
     collection.update(BSONDocument("_id" -> document.get("_id").getOrElse(BSONObjectID.generate)), document, upsert = true)
   }
 
+}
+
+object AdRepoImpl {
+
+  def apply(reactiveMongoApi: ReactiveMongoApi): AdRepoImpl = new AdRepoImpl(reactiveMongoApi) <| setupIndex
+
+  def setupIndex(impl: AdRepoImpl): Unit = {
+    import scala.concurrent.ExecutionContext.Implicits.global
+    impl.collection.indexesManager.ensure(Index(key = Seq(AdFields.Url -> IndexType.Text), unique = true)) onComplete { r =>
+      println(s"db: $r when ensuring unique index on key $AdFields.Url")
+    }
+  }
 }
