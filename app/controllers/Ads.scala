@@ -8,14 +8,14 @@ import play.modules.reactivemongo.json._
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import reactivemongo.api.ReadPreference
 import reactivemongo.bson.{BSONDocument, BSONNull, BSONObjectID}
-import repos.AdRepoImpl
+import repos.AdRepo
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class Ads @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Controller
   with MongoController with ReactiveMongoComponents {
 
-  val adRepo = AdRepoImpl(reactiveMongoApi)
+  val adRepo = AdRepo(reactiveMongoApi)
 
   import AdFields._
 
@@ -31,20 +31,13 @@ class Ads @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Controller
       .collect[List]() map (ads => Ok(Json.toJson(ads head))) //TODO change from just one ad to a stream
   }
 
-  import controllers.AdFields._
-
   def create = Action.async(BodyParsers.parse.json) { implicit request =>
-    val url = (request.body \ Url).as[String]
-    val age = (request.body \ Age).as[Int]
-    val title = (request.body \ Title).as[String]
-    val text = (request.body \ Text).as[String]
-    val imageUrls = (request.body \ ImageUrls).as[List[String]]
     adRepo.save(BSONDocument(
-      Url -> url,
-      Age -> age,
-      Title -> title,
-      Text -> text,
-      ImageUrls -> imageUrls,
+      Url -> (request.body \ Url).as[String],
+      Age -> (request.body \ Age).as[Int],
+      Title -> (request.body \ Title).as[String],
+      Text -> (request.body \ Text).as[String],
+      ImageUrls -> (request.body \ ImageUrls).as[List[String]],
       EstimatedAge -> BSONNull
     )).map(result => Created)
   }
@@ -55,20 +48,14 @@ class Ads @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Controller
   }
 
   def update(id: String) = Action.async(BodyParsers.parse.json) { implicit request =>
-    val url = (request.body \ Url).as[String]
-    val age = (request.body \ Age).as[Int]
-    val title = (request.body \ Title).as[String]
-    val text = (request.body \ Text).as[String]
-    val imageUrls = (request.body \ ImageUrls).as[List[String]]
-    val estimatedAge = (request.body \ EstimatedAge).as[Double]
     adRepo.update(BSONDocument(Id -> BSONObjectID(id)),
       BSONDocument("$set" -> BSONDocument(
-        Url -> url,
-        Age -> age,
-        Title -> title,
-        Text -> text,
-        ImageUrls -> imageUrls,
-        EstimatedAge -> estimatedAge
+        Url -> (request.body \ Url).as[String],
+        Age -> (request.body \ Age).as[Int],
+        Title -> (request.body \ Title).as[String],
+        Text -> (request.body \ Text).as[String],
+        ImageUrls -> (request.body \ ImageUrls).as[List[String]],
+        EstimatedAge -> (request.body \ EstimatedAge).as[Double]
       )))
       .map(result => Accepted)
   }

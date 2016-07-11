@@ -10,7 +10,7 @@ import play.api.test._
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.commands.LastError
 import reactivemongo.bson.BSONDocument
-import repos.AdRepoImpl
+import repos.AdRepo
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,7 +31,7 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest with Results with Mock
 
   }
 
-  val mockRecipeRepo = mock[AdRepoImpl]
+  val mockRecipeRepo = mock[AdRepo]
   val reactiveMongoApi = mock[ReactiveMongoApi]
   val documentId = "56a0ddb6c70000c700344254"
   val lastRequestStatus = new LastError(true, None, None, None, 0, None, false, None, None, false, None, None)
@@ -52,7 +52,7 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest with Results with Mock
   val controller = new TestController()
 
   class TestController() extends Ads(reactiveMongoApi) {
-    override def adRepo: AdRepoImpl = mockRecipeRepo
+    override val adRepo: AdRepo = mockRecipeRepo
   }
 
 

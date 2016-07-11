@@ -22,3 +22,11 @@ PUT        /api/ad/:id      controllers.Ads.update(id: String)
 POST       /api/ad          controllers.Ads.create
 DELETE     /api/ad/:id      controllers.Ads.delete(id: String)
 PATCH      /api/ad/:id      controllers.Ads.update(id: String)
+
+#Images
+GET        /api/image         controllers.Images.index
+GET        /api/image/:id      controllers.Images.read(id: String)
+POST       /api/image          controllers.Images.create
+PUT        /api/image/:id      controllers.Images.update(id: String)
+PATCH      /api/image/:id      controllers.Images.update(id: String)
+
