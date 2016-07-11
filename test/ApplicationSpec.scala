@@ -10,7 +10,7 @@ import play.api.test._
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.commands.LastError
 import reactivemongo.bson.BSONDocument
-import repos.AdRepo
+import repos.{AdRepo, ImageRepo}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,7 +31,8 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest with Results with Mock
 
   }
 
-  val mockRecipeRepo = mock[AdRepo]
+  val mockAdRepo = mock[AdRepo]
+  val mockImageRepo = mock[ImageRepo]
   val reactiveMongoApi = mock[ReactiveMongoApi]
   val documentId = "56a0ddb6c70000c700344254"
   val lastRequestStatus = new LastError(true, None, None, None, 0, None, false, None, None, false, None, None)
@@ -51,65 +52,65 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest with Results with Mock
     ))
   val controller = new TestController()
 
-  class TestController() extends Ads(reactiveMongoApi) {
-    override val adRepo: AdRepo = mockRecipeRepo
+  class TestController() extends Ads(reactiveMongoApi, mockImageRepo) {
+    override val adRepo: AdRepo = mockAdRepo
   }
 
 
   "Recipes#delete" should {
     "remove recipe" in {
-      mockRecipeRepo.remove(any[BSONDocument])(any[ExecutionContext]) returns Future(lastRequestStatus)
+      mockAdRepo.remove(any[BSONDocument])(any[ExecutionContext]) returns Future(lastRequestStatus)
 
       val result: Future[Result] = controller.delete(documentId).apply(FakeRequest())
 
       status(result) mustEqual ACCEPTED
-      there was one(mockRecipeRepo).remove(any[BSONDocument])(any[ExecutionContext])
+      there was one(mockAdRepo).remove(any[BSONDocument])(any[ExecutionContext])
     }
   }
 
   "Recipes#list" should {
     "list recipes" in {
-      mockRecipeRepo.find()(any[ExecutionContext]) returns Future(posts)
+      mockAdRepo.find()(any[ExecutionContext]) returns Future(posts)
 
       val result: Future[Result] = controller.index().apply(FakeRequest())
 
       contentAsJson(result) mustEqual JsArray(posts)
-      there was one(mockRecipeRepo).find()(any[ExecutionContext])
+      there was one(mockAdRepo).find()(any[ExecutionContext])
     }
   }
 
   "Recipes#read" should {
     "read recipe" in {
-      mockRecipeRepo.select(any[BSONDocument])(any[ExecutionContext]) returns Future(Option(oatmealStout))
+      mockAdRepo.select(any[BSONDocument])(any[ExecutionContext]) returns Future(Option(oatmealStout))
 
       val result: Future[Result] = controller.read(documentId).apply(FakeRequest())
 
       contentAsJson(result) mustEqual oatmealStout
-      there was one(mockRecipeRepo).select(any[BSONDocument])(any[ExecutionContext])
+      there was one(mockAdRepo).select(any[BSONDocument])(any[ExecutionContext])
     }
   }
 
   "Recipes#create" should {
     "create recipe" in {
-      mockRecipeRepo.save(any[BSONDocument])(any[ExecutionContext]) returns Future(lastRequestStatus)
+      mockAdRepo.save(any[BSONDocument])(any[ExecutionContext]) returns Future(lastRequestStatus)
 
       val request = FakeRequest().withBody(oatmealStout)
       val result: Future[Result] = controller.create()(request)
 
       status(result) mustEqual CREATED
-      there was one(mockRecipeRepo).save(any[BSONDocument])(any[ExecutionContext])
+      there was one(mockAdRepo).save(any[BSONDocument])(any[ExecutionContext])
     }
   }
 
   "Recipes#update" should {
     "update recipe" in {
-      mockRecipeRepo.update(any[BSONDocument], any[BSONDocument])(any[ExecutionContext]) returns Future(lastRequestStatus)
+      mockAdRepo.update(any[BSONDocument], any[BSONDocument])(any[ExecutionContext]) returns Future(lastRequestStatus)
 
       val request = FakeRequest().withBody(oatmealStout)
       val result: Future[Result] = controller.update(documentId)(request)
 
       status(result) mustEqual ACCEPTED
-      there was one(mockRecipeRepo).update(any[BSONDocument], any[BSONDocument])(any[ExecutionContext])
+      there was one(mockAdRepo).update(any[BSONDocument], any[BSONDocument])(any[ExecutionContext])
     }
   }
 

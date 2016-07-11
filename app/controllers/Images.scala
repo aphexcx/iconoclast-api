@@ -6,7 +6,8 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import play.modules.reactivemongo.json._
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.api.ReadPreference
+import reactivemongo.bson.{BSONDocument, BSONNull, BSONObjectID}
 import repos.ImageRepo
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,6 +21,14 @@ class Images @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Controlle
 
   def index = Action.async { implicit request =>
     imageRepo.find() map (images => Ok(Json.toJson(images)))
+  }
+
+  def unprocessed = Action.async { implicit request =>
+    val query: BSONDocument = BSONDocument(
+      EstimatedAge -> BSONNull)
+    imageRepo.collection.find(query)
+      .cursor[BSONDocument](ReadPreference.Primary)
+      .collect[List]() map (images => Ok(Json.toJson(images head))) //TODO change from just one image to a stream
   }
 
   def create = Action.async(BodyParsers.parse.json) { implicit request =>

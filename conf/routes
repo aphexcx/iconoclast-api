@@ -16,7 +16,6 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 
 #Ads
 GET        /api/ad         controllers.Ads.index
-GET        /api/ad/unprocessed         controllers.Ads.unprocessed
 GET        /api/ad/:id      controllers.Ads.read(id: String)
 PUT        /api/ad/:id      controllers.Ads.update(id: String)
 POST       /api/ad          controllers.Ads.create
@@ -25,6 +24,7 @@ PATCH      /api/ad/:id      controllers.Ads.update(id: String)
 
 #Images
 GET        /api/image         controllers.Images.index
+GET        /api/image/unprocessed         controllers.Images.unprocessed
 GET        /api/image/:id      controllers.Images.read(id: String)
 POST       /api/image          controllers.Images.create
 PUT        /api/image/:id      controllers.Images.update(id: String)

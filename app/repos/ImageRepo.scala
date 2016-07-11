@@ -6,8 +6,6 @@ import controllers.AdFields
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.indexes.{Index, IndexType}
 
-import scalaz.syntax.id._
-
 /**
   * Created by aphex on 7/10/16.
   */
@@ -17,7 +15,7 @@ class ImageRepo @Inject()(reactiveMongoApi: ReactiveMongoApi) extends Repo(react
 
 object ImageRepo {
 
-  def apply(reactiveMongoApi: ReactiveMongoApi): ImageRepo = new ImageRepo(reactiveMongoApi) <| setupIndex
+  def apply(reactiveMongoApi: ReactiveMongoApi): ImageRepo = new ImageRepo(reactiveMongoApi) // <| setupIndex
 
   def setupIndex(repo: ImageRepo): Unit = {
     import scala.concurrent.ExecutionContext.Implicits.global
