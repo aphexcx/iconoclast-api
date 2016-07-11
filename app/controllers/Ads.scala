@@ -32,7 +32,8 @@ class Ads @Inject()(val reactiveMongoApi: ReactiveMongoApi, imageRepo: ImageRepo
         ImageFields.Id -> imageId,
         ImageFields.Url -> imageUrl,
         ImageFields.EstimatedAge -> BSONNull,
-        ImageFields.AdId -> adId
+        ImageFields.AdId -> adId,
+        ImageFields.LockUntil -> 0
       )).map(writeResult => imageId)
     }
     Future.sequence(imageIdFutures).flatMap { imageIds: List[BSONObjectID] =>
