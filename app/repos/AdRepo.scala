@@ -6,8 +6,6 @@ import controllers.AdFields
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.indexes.{Index, IndexType}
 
-import scalaz.syntax.id._
-
 /**
   * Created by aphex on 7/10/16.
   */
@@ -17,7 +15,7 @@ class AdRepo @Inject()(reactiveMongoApi: ReactiveMongoApi) extends Repo(reactive
 
 object AdRepo {
 
-  def apply(reactiveMongoApi: ReactiveMongoApi): AdRepo = new AdRepo(reactiveMongoApi) <| setupIndex
+  def apply(reactiveMongoApi: ReactiveMongoApi): AdRepo = new AdRepo(reactiveMongoApi) // <| setupIndex
 
   def setupIndex(repo: AdRepo): Unit = {
     import scala.concurrent.ExecutionContext.Implicits.global
