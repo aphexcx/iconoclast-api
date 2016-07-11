@@ -62,5 +62,5 @@ object ImageFields {
   val Id = "_id"
   val Url = "url"
   val EstimatedAge = "estimatedAge"
-  val AdId = "ad"
+  val AdId = "adId"
 }
