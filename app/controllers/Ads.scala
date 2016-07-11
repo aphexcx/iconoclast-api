@@ -4,8 +4,10 @@ import javax.inject.Inject
 
 import play.api.libs.json.Json
 import play.api.mvc._
+import play.modules.reactivemongo.json._
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.api.ReadPreference
+import reactivemongo.bson.{BSONDocument, BSONNull, BSONObjectID}
 import repos.AdRepoImpl
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -21,6 +23,14 @@ class Ads @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Controller
     adRepo.find() map (ads => Ok(Json.toJson(ads)))
   }
 
+  def unprocessed = Action.async { implicit request =>
+    val query: BSONDocument = BSONDocument(
+      EstimatedAge -> BSONNull)
+    adRepo.collection.find(query)
+      .cursor[BSONDocument](ReadPreference.Primary)
+      .collect[List]() map (ads => Ok(Json.toJson(ads head))) //TODO change from just one ad to a stream
+  }
+
   import controllers.AdFields._
 
   def create = Action.async(BodyParsers.parse.json) { implicit request =>
@@ -31,10 +41,11 @@ class Ads @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Controller
     val imageUrls = (request.body \ ImageUrls).as[List[String]]
     adRepo.save(BSONDocument(
       Url -> url,
-      ImageUrls -> imageUrls,
       Age -> age,
       Title -> title,
-      Text -> text
+      Text -> text,
+      ImageUrls -> imageUrls,
+      EstimatedAge -> BSONNull
     )).map(result => Created)
   }
 
@@ -49,13 +60,15 @@ class Ads @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Controller
     val title = (request.body \ Title).as[String]
     val text = (request.body \ Text).as[String]
     val imageUrls = (request.body \ ImageUrls).as[List[String]]
+    val estimatedAge = (request.body \ EstimatedAge).as[Double]
     adRepo.update(BSONDocument(Id -> BSONObjectID(id)),
       BSONDocument("$set" -> BSONDocument(
         Url -> url,
         Age -> age,
         Title -> title,
         Text -> text,
-        ImageUrls -> imageUrls
+        ImageUrls -> imageUrls,
+        EstimatedAge -> estimatedAge
       )))
       .map(result => Accepted)
   }
@@ -74,4 +87,5 @@ object AdFields {
   val Title = "title"
   val Text = "text"
   val ImageUrls = "imageUrls"
+  val EstimatedAge = "estimatedAge"
 }

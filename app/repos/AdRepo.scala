@@ -32,7 +32,7 @@ class AdRepoImpl @Inject()(reactiveMongoApi: ReactiveMongoApi) extends AdRepo {
   override def find()(implicit ec: ExecutionContext): Future[List[JsObject]] = {
     val genericQueryBuilder = collection.find(Json.obj())
     val cursor = genericQueryBuilder.cursor[JsObject](ReadPreference.Primary)
-    cursor.collect[List]()
+    cursor.collect[List](100)
   }
 
   def collection: JSONCollection = reactiveMongoApi.db.collection[JSONCollection]("ads")
