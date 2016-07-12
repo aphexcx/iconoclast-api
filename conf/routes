@@ -3,7 +3,7 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.Application.index
+# GET     /                           controllers.Application.index
 GET     /cleanup                           controllers.Application.cleanup
 # An example controller showing how to use dependency injection
 GET     /count                      controllers.CountController.count
@@ -24,6 +24,7 @@ PATCH      /api/ad/:id      controllers.Ads.update(id: String)
 
 #Images
 GET        /api/image         controllers.Images.index
+GET        /api/image/underage         controllers.Images.underage
 GET        /api/image/unprocessed         controllers.Images.unprocessed
 GET        /api/image/:id      controllers.Images.read(id: String)
 POST       /api/image          controllers.Images.create

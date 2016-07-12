@@ -6,6 +6,7 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import play.modules.reactivemongo.json._
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
+import reactivemongo.api.ReadPreference
 import reactivemongo.bson.{BSONDocument, BSONNull, BSONObjectID}
 import repos.ImageRepo
 
@@ -21,6 +22,21 @@ class Images @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Controlle
 
   def index = Action.async { implicit request =>
     imageRepo.find() map (images => Ok(Json.toJson(images)))
+  }
+
+  def underage = Action.async { implicit request =>
+    val query: BSONDocument = BSONDocument(
+      EstimatedAge -> BSONDocument(
+        "$lt" -> 21.0,
+        "$ne" -> -1.0
+      )
+    )
+    imageRepo.collection.find(query)
+      //      .sort(BSONDocument(EstimatedAge -> -1))
+      .cursor[BSONDocument](ReadPreference.Primary)
+      .collect[List]()
+      //      .flatMap(option => option.map(lock).getOrElse(Future(BSONDocument())))
+      .map(imageList => Ok(Json.toJson(imageList)))
   }
 
   def unprocessed = Action.async { implicit request =>
