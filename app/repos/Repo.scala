@@ -28,9 +28,9 @@ abstract class Repo @Inject()(reactiveMongoApi: ReactiveMongoApi) extends RepoLi
   val collectionName: String
 
   override def find()(implicit ec: ExecutionContext): Future[List[JsObject]] = {
-    val genericQueryBuilder = collection.find(Json.obj())
-    val cursor = genericQueryBuilder.cursor[JsObject](ReadPreference.Primary)
-    cursor.collect[List](100)
+    collection.find(Json.obj())
+      .cursor[JsObject](ReadPreference.Primary)
+      .collect[List](100)
   }
 
   override def select(selector: BSONDocument)(implicit ec: ExecutionContext): Future[Option[JsObject]] = {
@@ -41,6 +41,8 @@ abstract class Repo @Inject()(reactiveMongoApi: ReactiveMongoApi) extends RepoLi
     collection.update(selector, update)
   }
 
+  def collection: JSONCollection = reactiveMongoApi.db.collection[JSONCollection](collectionName)
+
   override def remove(document: BSONDocument)(implicit ec: ExecutionContext): Future[WriteResult] = {
     collection.remove(document)
   }
@@ -48,8 +50,6 @@ abstract class Repo @Inject()(reactiveMongoApi: ReactiveMongoApi) extends RepoLi
   override def save(document: BSONDocument)(implicit ec: ExecutionContext): Future[WriteResult] = {
     collection.update(BSONDocument("_id" -> document.get("_id").getOrElse(BSONObjectID.generate)), document, upsert = true)
   }
-
-  def collection: JSONCollection = reactiveMongoApi.db.collection[JSONCollection](collectionName)
 }
 
 
