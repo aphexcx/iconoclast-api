@@ -8,6 +8,7 @@ import play.modules.reactivemongo.json._
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import reactivemongo.api.ReadPreference
 import reactivemongo.bson.{BSONDocument, BSONNull, BSONObjectID}
+import reactivemongo.core.commands.Count
 import repos.ImageRepo
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -22,6 +23,29 @@ class Images @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends Controlle
 
   def index = Action.async { implicit request =>
     imageRepo.find() map (images => Ok(Json.toJson(images)))
+  }
+
+  def stats = Action.async { implicit request =>
+    val query: BSONDocument = BSONDocument(
+      EstimatedAge -> BSONDocument(
+        "$ne" -> BSONNull
+      )
+    )
+    // Using this deprecated `command` method because I tried the following and it doesn't work
+    //.count(selector = Option(query))
+    // Could also do the following but that's inefficent:
+    //.find(query).cursor(ReadPreference.Primary).collect[List]().map(_.length)
+    reactiveMongoApi.db.command(
+      Count(
+        // run this command on the given collection
+        imageRepo.collection.name,
+        // ... with the query we wrote above
+        Some(query)))
+      .flatMap(analyzedCount =>
+        imageRepo.collection.count().map(totalCount =>
+          Ok(Json.obj("analyzedCount" -> analyzedCount, "totalCount" -> totalCount))
+        )
+      )
   }
 
   def underage = Action.async { implicit request =>
